@@ -10,6 +10,6 @@
         <repository type="git" url="https://github.com/g-loot/spdlog-gloot-wrapper.git" branch="master"/>
     </metadata>
     <files>
-        <file src=".packages\spdlog\*.*" target="spdlog"/>
+        <file src="spdlog\*.*" target="spdlog"/>
     </files>
 </package>
