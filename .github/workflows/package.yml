@@ -1,0 +1,36 @@
+name: spdlog-gloot-wrapper
+on:
+  push:
+    branches:
+      - master
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Bump version
+      id: version_bump
+      uses: anothrNick/github-tag-action@1.13.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: "patch"
+        RELEASE_BRANCHES: "master"
+  package:
+    runs-on: windows-latest
+    needs: tag
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Resolve keyword
+      run: sed -i "s/#VERSION#/$(git describe --tags)/g" spdlog-gloot-wrapper.nuspec
+    - name: Setup Nuget.exe
+      uses: nuget/setup-nuget@v1
+    - name: NuGet Package
+      run: nuget pack spdlog-gloot-wrapper.nuspec
+    - name: NuGet Source
+      run: nuget source Add -Name "G-Loot" -Source "https://nuget.pkg.github.com/g-loot/index.json" -UserName g-loot -Password ${{ secrets.NUGET_TOKEN }}
+    - name: NuGet SetApi
+      run: nuget setapikey ${{ secrets.NUGET_TOKEN }} -Source "G-Loot"
+    - name: NuGet push
+      run: nuget push spdlog-gloot-wrapper.$(git describe --tags).nupkg -Source "G-Loot"
